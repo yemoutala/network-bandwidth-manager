@@ -1,0 +1,13 @@
+flask==2.1.0
+flask-restful==0.3.9
+psycopg2-binary==2.9.3
+sqlalchemy==1.4.31
+netfilter==0.4.3
+pyroute2==0.6.0
+pyjwt==2.3.0
+requests==2.27.1
+pytz==2022.1
+celery==5.2.3
+redis==4.1.4
+psutil==5.9.0
+python-iptables==0.14.0
