@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: network-bandwidth-backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app/backend
+    environment:
+      - FLASK_ENV=production
+      - SECRET_KEY=votre_cle_secrete_tres_complexe
+      - DATABASE_URL=postgresql://admin:motdepasse_securise@postgres:5432/networkmanager
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - network-manager-network
+    privileged: true
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: network-bandwidth-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - network-manager-network
+
+  postgres:
+    image: postgres:13
+    container_name: network-manager-db
+    environment:
+      POSTGRES_DB: networkmanager
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: motdepasse_securise
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - network-manager-network
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:6.2-alpine
+    container_name: network-manager-redis
+    networks:
+      - network-manager-network
+    ports:
+      - "6379:6379"
+
+  nginx:
+    image: nginx:latest
+    container_name: network-manager-nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - network-manager-network
+
+volumes:
+  postgres_data:
+  node_modules:
+
+networks:
+  network-manager-network:
+    driver: bridge
